@@ -1,7 +1,14 @@
+/*********************************************************************************************************************
+ ***  Create a copy in CASUSER
+ *********************************************************************************************************************/
 
 data casuser.cars;
  set sashelp.cars;
 run;
+
+/*********************************************************************************************************************
+ ***  Create Synthetic Data with PROC SMOTE
+ *********************************************************************************************************************/
 
 
 proc smote data = casuser.cars seed=1;
@@ -13,8 +20,9 @@ proc smote data = casuser.cars seed=1;
         K = 7;
 run;
 
-*** https://documentation.sas.com/doc/en/pgmsascdc/default/casml/casml_smote_syntax04.htm#casml.smote.sample_K;
-
+/*********************************************************************************************************************
+ ***  Validate the Data
+ *********************************************************************************************************************/
 
 title sashelp.cars Data;
 proc print data=sashelp.cars(obs=10);
@@ -28,21 +36,15 @@ proc print data=casuser.CarsSynth_Smote(obs=10);
  var invoice horsepower mpg_city mpg_highway weight;
 run;
 
-
-
-
 proc sgplot data=casuser.cars;
 title Original Cars Data;
  scatter x=horsepower y=mpg_highway;
 run;
 
-
 proc sgplot data=casuser.CarsSynth_Smote;
  title Synthetic Cars Data created with PROC SMOTE;
  scatter x=horsepower y=mpg_highway;
 run;
-
-
 
 
 ods noproctitle;

@@ -6,15 +6,15 @@ run;
 proc smote data = casuser.cars seed=1;
  input type drivetrain/level = nominal;
  input invoice horsepower mpg_city mpg_highway weight;
- output out=casuser.CarsSynth_Smote_40000;
- sample numsamples=40000 
+ output out=casuser.CarsSynth_Smote_4000000;
+ sample numsamples=4000000 
         EXTRAPOLATIONFACTOR = 0.1 
         K = 7;
 run;
 
 
 
-proc tabularGAN data = casuser.CarsSynth_Smote_40000  seed = 42   numSamples = 500;
+proc tabularGAN data = casuser.CarsSynth_Smote_4000000  seed = 42   numSamples = 500;
 
  input type drivetrain/level = nominal;
  input invoice horsepower mpg_city mpg_highway weight;
@@ -25,12 +25,12 @@ proc tabularGAN data = casuser.CarsSynth_Smote_40000  seed = 42   numSamples = 5
     train embeddingDim = 32 miniBatchSize = 300 useOrigLevelFreq;
 
     saveState rStore = casuser.ASTORE_CarsSynth_TabGAN;
-    output out = casuser.CarsSynth_TabGAN_40000;
+    output out = casuser.CarsSynth_TabGAN_4000000;
 run; quit;
 
 
-data gdata.CarsSynth_TabGAN_40000;
- set casuser.CarsSynth_TabGAN_40000;
+data gdata.CarsSynth_TabGAN_4000000;
+ set casuser.CarsSynth_TabGAN_4000000;
 run;
 
 

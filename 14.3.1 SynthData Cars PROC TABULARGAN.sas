@@ -9,9 +9,9 @@ proc tabularGAN data = casuser.cars  seed = 42   numSamples = 500;
  input type drivetrain/level = nominal;
  input invoice horsepower mpg_city mpg_highway weight;
 
-    gmm alpha = 1 maxClusters = 10 seed = 42 VB(maxVbIter = 30);
-    aeOptimization ADAM LearningRate = 0.0001 numEpochs = 30;
-    ganOptimization ADAM(beta1 = 0.55 beta2 = 0.95) numEpochs = 50;
+    gmm alpha = 1 maxClusters = 10 seed = 42 VB(maxVbIter = 3);
+    aeOptimization ADAM LearningRate = 0.0001 numEpochs = 3;
+    ganOptimization ADAM(beta1 = 0.55 beta2 = 0.95) numEpochs = 5;
     train embeddingDim = 32 miniBatchSize = 300 useOrigLevelFreq;
 
     saveState rStore = casuser.ASTORE_CarsSynth_TabGAN;
@@ -65,5 +65,26 @@ proc freq data= casuser.CarsSynth_TabGAN;
  title Synthetic Cars Data created with PROC TABULARGAN;
  table type *  drivetrain / plots=(mosaicplot);
 run;
+
+
+data casuser.Cars800_Base;
+ do id = 1 to 800;
+   output;
+ end;
+run;
+
+
+proc astore;
+ score data     = casuser.Cars800_Base
+       rstore   = casuser.ASTORE_CarsSynth_TabGAN
+       out      = casuser.CarsSynthData_TabGAN800
+       copyVars = (_all_)
+;
+run;
+
+data gdata.CarsSynthData_TabGAN800;
+ set casuser.CarsSynthData_TabGAN800;
+run;
+
 
 
