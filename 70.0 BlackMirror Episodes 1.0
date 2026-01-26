@@ -1,0 +1,113 @@
+%let omdb_key=c4d6f026;
+
+*** User TMDB = bmirror;
+** API token für den Lesezugriff
+eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZWIyMjliMGJlZDIwZDJjOTcwNTRjNWI5NmQ1MmUxNSIsIm5iZiI6MTc2OTQyNzkzOS4yNDMsInN1YiI6IjY5Nzc1M2UzNjUyOGM5MTVlOGI2ODRhZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.y-ItuDy-mvLBPYmiLOUDhWyyRuou15XWiqDbavZ73zA
+** API schlüssel
+9eb229b0bed20d2c97054c5b96d52e15
+
+;
+
+
+/*** Count number of Seasons */
+
+
+filename cnt_seas temp;
+
+proc http
+    url='https://api.themoviedb.org/3/tv/42009?api_key=9eb229b0bed20d2c97054c5b96d52e15'
+    out=cnt_seas;
+run;
+
+libname cnt_s json fileref=cnt_seas;
+
+proc contents data=cnt_s._all_;
+run;
+
+proc sql noprint;
+ select max(value)
+ into :Cnt_seasons
+ from CNT_S.ALLDATA
+ where upcase(p1)="SEASONS" 
+    and upcase(p2)="SEASON_NUMBER";
+ quit;
+ 
+ %put ------------------------;
+ %put Number of Seasons found ;
+ %put &=cnt_seasons;
+ %put ------------------------;
+
+
+
+/*******************************************************************
+  TMDB
+********************************************************************/
+
+filename tmjson temp;
+
+proc http
+    url='https://api.themoviedb.org/3/tv/42009/season/1?api_key=9eb229b0bed20d2c97054c5b96d52e15'
+    out=tmjson;
+run;
+
+libname bm_tmb json fileref=tmjson;
+
+proc contents data=bm_tmb._all_;
+run;
+
+**** https://api.themoviedb.org/3/tv/42009/season/1?api_key=YOUR_API_KEY;
+**** https://api.themoviedb.org/3/tv/60735?api_key=YOUR_API_KEY;
+
+
+
+
+/*******************************************************************
+  OMDB
+********************************************************************/
+
+filename bmjson temp;
+
+proc http
+    url='http://www.omdbapi.com/?apikey=c4d6f026&i=tt2085059&Season=2'
+    out=bmjson;
+run;
+
+libname bmapi json fileref=bmjson;
+
+proc contents data=bmapi._all_;
+run;
+
+
+data black_mirror_s2;
+    set bmapi.episodes;
+
+    length season 8;
+    season = 1;
+
+    *rename
+        Episode = episode_number
+        Title   = title
+        Released= release_date
+        Plot    = description;
+
+    *keep season episode_number title release_date imdbRating;
+run;
+
+proc print data=black_mirror_s1;
+run;
+
+
+filename bm_f41 temp;
+
+proc http
+    url='http://www.omdbapi.com/?apikey=c4d6f026&i=tt2085059&Season=4&episode=1&plot=full'
+    out=bm_f41;
+run;
+
+libname bm_f json fileref=bm_f41;
+
+proc print data=bm_f.root;
+var plot;
+run;
+
+
