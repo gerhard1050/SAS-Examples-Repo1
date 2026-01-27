@@ -4,21 +4,26 @@
 3-Doublet, dice again
 4-3doublet, goto jail
 5-VA Report
-
+;
 %let cnt_players = 3;
-%let cnt_games   = 2000;
-%let cnt_rounds  = 80;
+%let cnt_games   = 1000;
+%let cnt_rounds  = 70;
 %let ConsiderJail = yes;
-%let Doublet3Jail = yes;
+%let Doublet3Jail = no;
+%let ConsiderAction = no;
 %let seed  = 1;
+*%let ScenarioName = "2. go-to-jail and 3Doublet";
+%let ScenarioName = "1. go-to-jail only ignore 3Doublet";
+*%let ScenarioName = "0. No Jail";
 
 
- data work.Monopoly1(where=(Round ne 0));
+ data     work.Monopoly1(where=(Round ne 0))
+ ;
 
   format Game Round Player Dice1 Dice2 DiceSum 8.;
 
-  Array PlayerPos     {&cnt_players.} PlayerPos1  - PlayerPos&cnt_players. ;
-  ARRAY PlayerInJail    {&cnt_players.} PlayerInJail1 - PlayerInJail&cnt_players.;
+  ARRAY PlayerPos     {&cnt_players.} PlayerPos1  - PlayerPos&cnt_players. ;
+  ARRAY PlayerInJail  {&cnt_players.} PlayerInJail1 - PlayerInJail&cnt_players.;
  * Array Field         {52} Field1        - Field52       ;
 
 
@@ -76,24 +81,98 @@
 
 
                 %if %upcase(&ConsiderJail) = YES %then %do;
-                  if PlayerPos[Player]=11 then PlayerPos[Player] = 31; *** Go to Jail;
+
+                  if PlayerPos[Player]=11 then do; 
+                        PlayerPos[Player] = 31; *** Go to Jail;
+                        PlayerInJail[player]=3;
+                  end;                        
+
                 %end; ** Jail;
  
 
 
-              output;
+              output work.Monopoly1;
+
             end; *** Player;
         end; *** Round;
  end; *** Game;
 run;
 
+
+data work.PlayerPos_LastRecRound;
+ set work.monopoly1;
+ by Game Round Player;
+ drop dice1 dice2 dicesum player;
+  ARRAY PlayerPos     {&cnt_players.} PlayerPos1  - PlayerPos&cnt_players. ;
+  ARRAY PlayerInJail  {&cnt_players.} PlayerInJail1 - PlayerInJail&cnt_players.;
+  do Player = 1 to &cnt_players;
+   if PlayerInJail[Player] then PlayerPos[Player]=.;
+  end;
+  if last.round then output;
+run;
+
+proc transpose data=work.PlayerPos_LastRecRound out=work.PlayerPos_LastRecRound_tp;*(drop=_name_ rename=(col1 = Field) where =(Field ne .));
+ by game round;
+ var PlayerPos:;
+run;
+
+data work.PlayerPos_LastRecRound_tp;
+*data work.Monopoly_Visit_Scenarios;
+ length ScenarioName $50 ConsiderJail ConsiderAction Doublet3Jail $3;
+ set work.PlayerPos_LastRecRound_tp;
+ drop _name_;
+ rename col1 = Field;
+ where col1 ne .;
+ ScenarioName = &ScenarioName;
+ ConsiderJail = upcase("&ConsiderJail");
+ ConsiderAction = upcase("&ConsiderAction");
+ Doublet3Jail = upcase("&Doublet3Jail");
+run;
+
+
+
+*%CASTableLoad(Monopoly_Visit_Scenarios,inlib=work);
+/*
+data casuser.Monopoly_Visit_Scenarios(promote=YES);
+ set work.playerpos_lastrecround_tp;
+run;
+*/
+
+/**/ 
+data casuser.Monopoly_Visit_Scenarios(append=YES);
+ set work.playerpos_lastrecround_tp;
+run;
+
+
+
+/*
+*** Check if Last Record in Game has "open Jail records" to explain the uneven distribution on PlayerInJail;
+data work.Monopoly1_LastRecGame;
+ set work.monopoly1;
+ by Game Round ;
+ drop dice1 dice2 dicesum player round;
+ if last.Game then output;
+run;
+*/
+
+
+
 /**
-proc print;
+proc print work.Monopoly1_LastRecRound;;
  *where round in (67,68,69,70,71);
 run;
 **/
-
-proc freq ;
- table PlayerPos1-PlayerPos3/plots=(freqplot);
+/*
+proc freq data= work.Monopoly1_LastRecRound;;;
+ *table PlayerPos1-PlayerPos3/plots=(freqplot(scale=percent)) ;
+ table PlayerPos1/plots=(freqplot(scale=percent)) ;
 run;
 
+proc freq data= work.Monopoly1_LastRecRound;;
+ table PlayerInJail1-PlayerInJail3;
+run;
+*/
+
+proc freq data=CASUSER.MONOPOLY_VISIT_SCENARIOS;
+     table ScenarioName;
+run;
