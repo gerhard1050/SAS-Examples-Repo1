@@ -1,4 +1,4 @@
-proc format;
+/***proc format;
 value field
 1	="01 Start"
 2	="02 Kalakaua Avenue"
@@ -61,7 +61,7 @@ other = '1 Normal';
 run;
 
 
-
+**/
 
 
 
