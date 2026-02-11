@@ -1,3 +1,4 @@
+
 data WORK.PROPERTY_COSTREVENUE;
   infile datalines dsd truncover;
   input 

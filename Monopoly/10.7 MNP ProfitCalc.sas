@@ -31,16 +31,18 @@ quit;
 
 
 
- data     work.Monopoly1(where=(Round ne 0))
+ data     work.MNP_Sim2(where=(Round ne 0))
  ;
 
   format Game Round Player Dice1 Dice2 DiceSum 8.;
 
   ARRAY PlayerPos     {&cnt_players.} PlayerPos1  - PlayerPos&cnt_players. ;
   ARRAY PlayerInJail  {&cnt_players.} PlayerInJail1 - PlayerInJail&cnt_players.;
+
   Array PlayerBalance {&cnt_players} PlayerBalance1 - PlayerBalance&cnt_players.  ;
   Array PlayerIncome  {&cnt_players} PlayerIncome1  - PlayerIncome&cnt_players.   ;
   Array PlayerExpense {&cnt_players} PlayerExpense1 - PlayerExpense&cnt_players.  ;
+
   Array Field         {40} Field1        - Field40       ;
   Array FieldSetup    {40} FieldSetup1   - FieldSetup40  ;
   Array FieldRevenue  {40} FieldRevenue1 - FieldRevenue40;
@@ -310,7 +312,7 @@ quit;
                                     %end; *** CalcProfit yesno;
 
 
-                                    output work.Monopoly1;
+                                    output;
 
                                     end; *** Player;
 
@@ -333,8 +335,8 @@ run;
 *** Keep only last record of round
 ***************************************************************/
 
-data work.LastRecOfRound;
- set work.monopoly1;
+data work.MNP_Sim2_LastRec;
+ set work.MNP_Sim2;
  by Game Round Player;
  drop dice1 dice2 dicesum;
   *** Set Location to MISSING, if Player is in Jail to avoid double/triple counting;
@@ -354,29 +356,20 @@ run;
 ***************************************************************/
 
 
-proc transpose data=work.LastRecOfRound 
-                out=work.Player_tp;*(drop=_name_ rename=(col1 = Field) where =(Field ne .));
+proc transpose data=work.MNP_Sim2_LastRec 
+                out=work.Player_Long;
  by game round;
  var PlayerPos: PlayerBalance:;
 run;
 
 data work.Player_LocationWallet;
-*data work.Monopoly_Visit_Scenarios;
- *length ScenarioName $50 ConsiderJail ConsiderAction Doublet3Jail $3;
- set work.Player_tp;
+ set work.Player_Long;
  Player=input(compress(_name_,,"ul"),3.);
  Feature=strip(compress(tranwrd(_name_,'Player',''),,"d"));
  if Feature = "Pos" then Feature = "Location";
  else if Feature = "Balance" then Feature = "Wallet";
  rename col1 = Value;
  drop _name_;
- *where col1 ne .;
- /*
- ScenarioName = &ScenarioName;
- ConsiderJail = upcase("&ConsiderJail");
- ConsiderChance = upcase("&ConsiderChance");
- Doublet3Jail = upcase("&Doublet3Jail");
- */
 run;
 
 
@@ -399,8 +392,6 @@ if in2 then do;
    Value = Ranking;
 end;
 drop ranking;
- ID = Field;
-
 run;
 
 
@@ -410,25 +401,15 @@ proc sort data=work.Player_Stats;
  by game round Feature Player;
 run;
 
-/*** 
-
-proc means data=work.Player_Stats mean maxdec=2;
-    class player;
-    var value;
-    where Feature = "Ranking" and Round > 70;
-run;
-
-***/
 
 /**************************************************************
 *** Prepare Field Table
 ***************************************************************/
 
 
-proc transpose data=work.LastRecOfRound 
+proc transpose data=work.MNP_Sim2_LastRec 
                 out=work.Field_Stats;*(drop=_name_ rename=(col1 = Field) where =(Field ne .));
  by game round;
- *var Field: FieldBalance: FieldSetup:;
  var FieldBalance:;
 run;
 
@@ -436,12 +417,9 @@ data work.Field_Stats;
 length Game Round 8 Feature $8 Field 8;* Value 8;    
  set work.Field_Stats;
  Field=input(compress(_name_,,"ul"),3.);
- Feature_tmp=strip(compress(_name_,,"d"));
- if Feature_tmp = "Field" then Feature = "Owner";
- else Feature = tranwrd(Feature_tmp,'Field','');
+ Feature = "Balance";
  rename col1 = Value;
- drop _name_ Feature_tmp;
- ID = Field;
+ drop _name_;
 run;
 
 
@@ -455,32 +433,6 @@ data work.ResultsRepo;
 run;
 
 
-*cas cas1;
-
-data casuser.ResultsRepo(promote=yes);
- set work.resultsrepo;
-run;
 
 
 
-
-
-
-
-
-data gdata.field_statistics;*(promote=yes);
- set work.field_statistics;
-run;
-
-data gdata.player_statistics;*(promote=yes);
- set work.player_statistics;
-run;
-
- 
-data casuser.field_statistics(promote=yes);
- set gdata.field_statistics;
-run;
-
-data casuser.player_statistics(promote=yes);
- set gdata.player_statistics;
-run;
