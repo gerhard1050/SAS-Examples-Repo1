@@ -39,13 +39,11 @@
                 DiceSum = sum(Dice1,Dice2);
 
                 if Dice1 = Dice2 then do; ** First Doublet;
-                   output;
                    Dice1 = ceil(rand('Uniform')*6);    
                    Dice2 = ceil(rand('Uniform')*6);
                    DiceSum + sum(Dice1,Dice2);
 
                    if Dice1 = Dice2 then do; ** Second Doublet;
-                      output;
                       Dice1 = ceil(rand('Uniform')*6);    
                       Dice2 = ceil(rand('Uniform')*6);
                       DiceSum + sum(Dice1,Dice2);
