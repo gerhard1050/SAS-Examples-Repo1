@@ -59,10 +59,9 @@
                  
                     end; ** Second Doublet;
                 end; ** First Doublet;
-                if PlayerInJail[player] ne 3 then do; ** was just sent to jail, do not move forward;
+
                     PlayerPos[Player] + DiceSum;
                     PlayerPos[Player] = mod(PlayerPos[Player]-1,40)+1;
-                end; ** PlayerJail Check = 0;
               end; 
 
               else PlayerInJail[player] + (-1);
@@ -97,7 +96,7 @@ data work.MNP_Sim1_LastRec;
   ARRAY PlayerPos     {&cnt_players.} PlayerPos1  - PlayerPos&cnt_players. ;
   ARRAY PlayerInJail  {&cnt_players.} PlayerInJail1 - PlayerInJail&cnt_players.;
   do Player = 1 to &cnt_players;
-   if PlayerInJail[Player] then PlayerPos[Player]=.;
+   if PlayerInJail[Player] ne 0 then PlayerPos[Player]=.;
   end;
   *** Keep only last record per round;
   if last.round then output;
@@ -137,7 +136,8 @@ run;
 proc sgplot data=work.player_location;
  title Scenario: &scenarioname.;
  histogram value / binstart=1 binwidth=1;
- yaxis max = 6;
+ yaxis max = 6 label = "Proportion of Visits (%)";
+ xaxis label = "Field Number";
 run;
 title;
 

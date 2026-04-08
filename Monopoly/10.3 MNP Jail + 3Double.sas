@@ -144,7 +144,8 @@ run;
 proc sgplot data=work.player_location;
  title Scenario: &scenarioname.;
  histogram value / binstart=1 binwidth=1;
- yaxis max = 6;
+ yaxis max = 6 label = "Proportion of Visits (%)";
+ xaxis label = "Field Number";
 run;
 title;
 
