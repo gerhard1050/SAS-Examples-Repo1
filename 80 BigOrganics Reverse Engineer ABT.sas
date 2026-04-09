@@ -4,10 +4,11 @@
 
 %let CutoffDate = 01JAN2025;
 
+libname tundata (work);
 
 data work.BORG_Demogr;
- set tundata.bigorganics;
- *set work.bigorganics;
+ *set tundata.bigorganics;
+ set work.bigorganics;
  keep id DemAffl DemAge DemGender DemCluster DemTVReg;
 run;
 
