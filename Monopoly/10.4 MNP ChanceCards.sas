@@ -1,4 +1,4 @@
-
+﻿
 
 
 %let cnt_players = 5;
@@ -70,7 +70,7 @@
                  
                     end; ** Second Doublet;
                 end; ** First Doublet;
-                if PlayerInJail[player] ne 3 then do; ** was just sent to jail, do not move forward;
+                if PlayerInJail[player] ne 3 then do; ** otherwise was just sent to jail, do not move forward;
                     PlayerPos[Player] + DiceSum;
                     PlayerPos[Player] = mod(PlayerPos[Player]-1,40)+1;
                 end; ** PlayerJail Check = 0;
@@ -102,47 +102,39 @@
 
                         select (ActualChanceID);
 
-                        when (1) PlayerPos[Player] = 1;    /* Advance to GO */
-                        when (2) PlayerPos[Player] = 25;   /* Advance to Illinois Avenue */
-                        when (3) PlayerPos[Player] = 12;   /* Advance to St. Charles Place */
+                        when (1) PlayerPos[Player] = 40;  /* Take a walk on the Boardwalk */
+                        when (2) PlayerPos[Player] = 1;    /* Advance to GO */
+                        when (3) PlayerPos[Player] = 25;   /* Advance to Illinois Avenue */
+                        when (4) PlayerPos[Player] = 12;   /* Advance to St. Charles Place */
 
-                        /* Advance to nearest Utility */
-                        when (4) do;
-                            if PlayerPos[Player] in (8,23) then PlayerPos[Player] = 13;
-                            else if PlayerPos[Player] = 37 then PlayerPos[Player] = 29;
-                        end;
-
-                        /* Advance to nearest Railroad */
-                        when (5) do;
-                            if PlayerPos[Player] = 8  then PlayerPos[Player] = 16;
+                        when (5,6) do; /* Advance to nearest Railroad */
+                            if PlayerPos[Player] = 8 then PlayerPos[Player] = 16;
                             else if PlayerPos[Player] = 23 then PlayerPos[Player] = 26;
                             else if PlayerPos[Player] = 37 then PlayerPos[Player] = 6;
                         end;
 
-                        when (6) do; end;   /* Bank pays you dividend of $50 – no move */
-                        when (7) do; end;   /* Get Out of Jail Free – no move */
+                        when (7) do; /* Advance to nearest Utility */
+                            if PlayerPos[Player] in (8,37)  then PlayerPos[Player] = 13;
+                            else if PlayerPos[Player] = 23 then PlayerPos[Player] = 29;
+                        end;
+
+                        when (8) ;   /* Bank pays you dividend of $50 – no move */
+                        when (9) ;   /* Get Out of Jail Free – no move */
 
                         /* Go Back 3 Spaces */
-                        when (8) do;
+                        when (10) do;
                             if PlayerPos[Player] = 8  then PlayerPos[Player] = 5;
                             else if PlayerPos[Player] = 23 then PlayerPos[Player] = 20;
                             else if PlayerPos[Player] = 37 then PlayerPos[Player] = 34;
+							*** Alternative would be to use: PlayerPos[Player] = mod(PlayerPos[Player]-1,40)+1+3;
                         end;
 
-                        when (9) PlayerPos[Player] = 11;   /* Go to Jail */
-                        when (10) do; end;  /* General repairs – no move */
-                        when (11) do; end;  /* Pay poor tax – no move */
-                        when (12) PlayerPos[Player] = 6;   /* Take a trip to Reading Railroad */
-                        when (13) PlayerPos[Player] = 40;  /* Take a walk on the Boardwalk */
-                        when (14) do; end;  /* Chairman of the Board – no move */
-                        when (15) do; end;  /* Building loan matures – no move */
-
-                        /* Advance to nearest Railroad */
-                        when (16) do;
-                            if PlayerPos[Player] = 8  then PlayerPos[Player] = 16;
-                            else if PlayerPos[Player] = 23 then PlayerPos[Player] = 26;
-                            else if PlayerPos[Player] = 37 then PlayerPos[Player] = 6;
-                        end;
+                        when (11) PlayerPos[Player] = 11;   /* Go to Jail */
+                        when (12) ;  /* General repairs – no move */
+                        when (13) ;  /* Speeding fine - no move */
+                        when (14) PlayerPos[Player] = 6;   /* Take a trip to Reading Railroad */
+                        when (15) ;  /* Chairman of the Board – no move */
+                        when (16) ;  /* Building loan matures – no move */
 
                         otherwise;
                         end;
