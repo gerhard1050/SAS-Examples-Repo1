@@ -286,3 +286,6 @@ proc sgplot data=stationary_prob;
     yaxis label="Probability";
     title "Stationary Visit Probabilities (SAS IML)";
 run;
+
+
+**https://blogs.sas.com/content/iml/2014/08/20/heat-map-in-sasiml.html;
