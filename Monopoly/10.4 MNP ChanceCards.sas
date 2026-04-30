@@ -90,7 +90,7 @@
 
                 %if %upcase(&ConsiderChance) = YES %then %do;
 
-                 if PlayerPos[Player] in (3, 18, 39) then do; ** Pick CommunityChest Cards;
+                 if PlayerPos[Player] in (3, 18, 34) then do; ** Pick CommunityChest Cards;
 
                   if ActualCommChestID=1 then PlayerPos[Player] = 1; *** Goto Field 1;
                   else if ActualCommChestID=6 then PlayerPos[Player] = 11; *** Goto Field 11 = jail;
@@ -98,6 +98,9 @@
 
                  end; ** Community Chest Card;
 
+
+                 ** List and order of Chance Cars are taken from: https://monopoly.fandom.com/wiki/Chance;
+                 
                  else if PlayerPos[Player] in (8, 23, 37) then do; ** Pick Chance Cards;
 
                         select (ActualChanceID);
